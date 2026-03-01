@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectButton } from "thirdweb/react";
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { client } from "@/lib/client";
 
 export default function Header() {
   const pathname = usePathname();
+  const account = useActiveAccount();
 
   const navLinks = [
     { name: "Dashboard", href: "/dashboard" },
@@ -26,21 +27,23 @@ export default function Header() {
         </Link>
       </div>
       <div className="hidden md:flex flex-1 justify-end gap-8 items-center">
-        <nav className="flex items-center gap-9">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.name}
-              href={link.href}
-              className={`text-sm font-medium leading-normal transition-colors ${
-                pathname === link.href 
-                ? "text-primary dark:text-primary" 
-                : "text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary"
-              }`}
-            >
-              {link.name}
-            </Link>
-          ))}
-        </nav>
+        {account && (
+          <nav className="flex items-center gap-9">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name}
+                href={link.href}
+                className={`text-sm font-medium leading-normal transition-colors ${
+                  pathname === link.href 
+                  ? "text-primary dark:text-primary" 
+                  : "text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary"
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+        )}
         <ConnectButton
           client={client} 
           connectButton={{ label: "Connect Admin Wallet" }}

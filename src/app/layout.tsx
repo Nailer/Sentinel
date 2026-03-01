@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import { ThirdwebProvider } from "@/components/ThirdwebProviderWrapper";
+import AuthWrapper from "@/components/AuthWrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,9 +31,11 @@ export default function RootLayout({
       <body className={`${inter.variable} font-display antialiased min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100`}>
         <ThirdwebProvider>
           <Header />
-          <div className="flex-1 flex flex-col">
-            {children}
-          </div>
+          <AuthWrapper>
+            <div className="flex-1 flex flex-col">
+              {children}
+            </div>
+          </AuthWrapper>
         </ThirdwebProvider>
       </body>
     </html>
