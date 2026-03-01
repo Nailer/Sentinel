@@ -12,8 +12,7 @@ export default function Header() {
     { name: "Dashboard", href: "/dashboard" },
     { name: "Vaults", href: "/vaults" },
     { name: "Reasoning Lab", href: "/ai-logs" },
-    { name: "Setup", href: "/setup" },
-    { name: "Settings", href: "/settings" }
+    { name: "Setup", href: "/wizard" }
   ];
 
   return (

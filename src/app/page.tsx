@@ -20,10 +20,10 @@ export default function LandingPage() {
 <span className="text-primary text-xs font-bold uppercase tracking-wider">Protocol Guardian Active</span>
 </div>
 <h1 className="text-slate-900 dark:text-white text-5xl md:text-6xl font-black leading-tight tracking-[-0.033em]">
-                                Autonomous Safeguards for the New Financial Era
+                                AI-Orchestrated Safety for Every Transaction
                             </h1>
 <p className="text-slate-600 dark:text-slate-300 text-lg md:text-xl font-normal leading-relaxed max-w-[600px]">
-                                Institutional-grade DeFi security platform for autonomous protocol guardianship using Chainlink and Gemini AI.
+                                Real-time transaction monitoring and autonomous threat prevention powered by AI. Seamlessly protect your protocol&apos;s digital assets against zero-day exploits, market manipulation, and malicious actors before they strike.
                             </p>
 </div>
 <div className="flex flex-col sm:flex-row gap-4">
@@ -53,27 +53,63 @@ export default function LandingPage() {
 {/* Hero Visual */}
 <div className="lg:w-1/2 relative group">
 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-<div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square bg-surface-dark rounded-xl overflow-hidden border border-border-dark shadow-2xl flex items-center justify-center" data-alt="Abstract 3D visualization of a shielded digital vault with glowing green geometric patterns representing security" style={{background: `radial-gradient(circle at center, #163328 0%, #0f231b 100%)`}}>
-{/* Abstract Representation of 3D Vault using CSS/SVG */}
-<div className="relative size-64 md:size-80 animate-[spin_20s_linear_infinite]">
-<svg className="w-full h-full text-primary/20 fill-current" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-<path d="M100 10 L190 50 L190 150 L100 190 L10 150 L10 50 Z" fill="none" stroke="currentColor" strokeWidth="1"></path>
-<path d="M100 20 L180 55 L180 145 L100 180 L20 145 L20 55 Z" fill="none" opacity="0.5" stroke="currentColor" strokeWidth="1"></path>
-<circle className="animate-pulse" cx="100" cy="100" fill="currentColor" opacity="0.3" r="40"></circle>
-</svg>
-</div>
-<div className="absolute inset-0 flex items-center justify-center">
-<span className="material-symbols-outlined text-6xl text-primary drop-shadow-[0_0_15px_rgba(0,255,149,0.8)]">security</span>
-</div>
-{/* Glassmorphism Card Overlay */}
-<div className="absolute bottom-6 left-6 right-6 bg-background-dark/40 backdrop-blur-md border border-white/10 p-4 rounded-lg flex items-center justify-between">
-<div>
-<p className="text-xs text-slate-400 uppercase tracking-wider">Current Status</p>
-<p className="text-sm text-white font-mono">System Nominal • 99.9% Uptime</p>
-</div>
-<div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_#00ff95]"></div>
-</div>
-</div>
+<div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square bg-surface-dark rounded-xl overflow-hidden border border-border-dark shadow-2xl flex items-center justify-center" data-alt="Dynamic visualization of an AI-orchestrated security shield with pulsing concentric rings representing active 24/7 defense" style={{background: `radial-gradient(circle at center, #163328 0%, #0f231b 100%)`}}>
+  
+  {/* Dynamic Security Radar / Shield Representation */}
+  <div className="absolute inset-0 flex items-center justify-center">
+    {/* Concentric Pulsing Rings */}
+    <div className="absolute size-48 md:size-64 rounded-full border border-primary/20 animate-ping" style={{ animationDuration: '3s' }}></div>
+    <div className="absolute size-64 md:size-80 rounded-full border border-primary/10 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+    <div className="absolute size-80 md:size-96 rounded-full border border-primary/5 animate-ping" style={{ animationDuration: '5s', animationDelay: '2s' }}></div>
+    
+    {/* Rotating Scan Line */}
+    <div className="absolute size-96 rounded-full overflow-hidden animate-[spin_6s_linear_infinite] opacity-30">
+        <div className="w-1/2 h-full bg-gradient-to-r from-transparent to-primary origin-right"></div>
+    </div>
+  </div>
+
+  {/* Core Node Connections */}
+  <div className="relative size-full max-w-sm flex items-center justify-center z-10">
+    <svg className="w-full h-full text-primary/40 stroke-current" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#00ff95" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#00ff95" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      {/* Network Lines */}
+      <line x1="100" y1="100" x2="50" y2="50" strokeWidth="1" strokeDasharray="4 4" className="animate-[dash_10s_linear_infinite]"/>
+      <line x1="100" y1="100" x2="150" y2="40" strokeWidth="1" strokeDasharray="4 4"/>
+      <line x1="100" y1="100" x2="160" y2="140" strokeWidth="1" strokeDasharray="4 4" className="animate-[dash_10s_linear_infinite_reverse]"/>
+      <line x1="100" y1="100" x2="40" y2="130" strokeWidth="1" strokeDasharray="4 4"/>
+      
+      {/* Perimeter Nodes */}
+      <circle cx="50" cy="50" r="3" fill="#00ff95" className="animate-pulse" />
+      <circle cx="150" cy="40" r="4" fill="#00ff95" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
+      <circle cx="160" cy="140" r="3" fill="#00ff95" className="animate-pulse" style={{ animationDelay: '1s' }} />
+      <circle cx="40" cy="130" r="4" fill="#00ff95" className="animate-pulse" style={{ animationDelay: '1.5s' }} />
+      
+      {/* Central Core */}
+      <circle cx="100" cy="100" r="24" fill="url(#nodeGlow)" />
+    </svg>
+    <div className="absolute inset-0 flex items-center justify-center">
+      <span className="material-symbols-outlined text-4xl text-background-dark bg-primary rounded-full p-3 shadow-[0_0_30px_rgba(0,255,149,0.8)] z-20">shield_lock</span>
+    </div>
+  </div>
+
+  {/* Glassmorphism Card Overlay */}
+  <div className="absolute bottom-6 left-6 right-6 bg-background-dark/80 backdrop-blur-xl border border-primary/20 p-4 rounded-lg flex items-center justify-between z-30 shadow-2xl">
+    <div>
+      <p className="text-xs text-primary uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
+          <span className="material-symbols-outlined text-[14px]">radar</span> Continuous Execution
+      </p>
+      <p className="text-sm text-white font-medium">100% Active • 24/7 Security Shielding</p>
+    </div>
+    <div className="relative flex items-center justify-center">
+      <div className="absolute h-4 w-4 rounded-full bg-primary animate-ping opacity-75"></div>
+      <div className="relative h-3 w-3 rounded-full bg-primary shadow-[0_0_12px_#00ff95]"></div>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -156,6 +192,7 @@ export default function LandingPage() {
 <span>Cross-chain monitoring</span>
 </li>
 </ul>
+</div>
 </div>
 </div>
 </div>
