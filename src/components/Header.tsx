@@ -11,7 +11,7 @@ export default function Header() {
 
   const navLinks = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Vaults", href: "/vaults" },
+    { name: "History", href: "/history" },
     { name: "Reasoning Lab", href: "/ai-logs" },
     { name: "Setup", href: "/wizard" }
   ];
