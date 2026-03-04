@@ -4,11 +4,11 @@ export default function Dashboard() {
     <div>
       
 <div className="layout-container flex grow flex-col">
-{/* Header */}
 
-{/* Main Content Area */}
+
+
 <main className="flex-1 px-6 py-8 md:px-10 lg:px-40 w-full max-w-[1600px] mx-auto">
-{/* Page Header */}
+
 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
 <div className="flex flex-col gap-2">
 <div className="flex items-center gap-2">
@@ -22,13 +22,13 @@ export default function Dashboard() {
 <span className="text-xs font-mono text-secondary">LIVE UPDATES</span>
 </div>
 </div>
-{/* Dashboard Grid */}
+
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-{/* Main Status Monitor (Dominant Center) */}
+
 <div className="lg:col-span-8 flex flex-col gap-6">
-{/* Health Traffic Light */}
+
 <div className="rounded-xl border border-border-dark bg-card-dark p-8 relative overflow-hidden group">
-{/* Background Glow Effect */}
+
 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-primary/10 blur-[60px] rounded-full pointer-events-none"></div>
 <div className="flex flex-col items-center justify-center text-center relative z-10">
 <div className="mb-4 relative">
@@ -55,9 +55,9 @@ export default function Dashboard() {
 </div>
 </div>
 </div>
-{/* Charts Section */}
+
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-{/* Vault Solvency Chart */}
+
 <div className="rounded-xl border border-border-dark bg-card-dark p-6 flex flex-col">
 <div className="flex justify-between items-start mb-6">
 <div>
@@ -72,7 +72,7 @@ export default function Dashboard() {
 <button className="text-secondary hover:text-white"><span className="material-symbols-outlined">more_horiz</span></button>
 </div>
 <div className="h-[180px] w-full relative">
-{/* Mock Chart SVG */}
+
 <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 300 100">
 <defs>
 <linearGradient id="solvencyGradient" x1="0" x2="0" y1="0" y2="1">
@@ -83,7 +83,7 @@ export default function Dashboard() {
 <path d="M0,80 C50,80 50,40 100,40 C150,40 150,60 200,60 C250,60 250,20 300,20 V100 H0 Z" fill="url(#solvencyGradient)"></path>
 <path d="M0,80 C50,80 50,40 100,40 C150,40 150,60 200,60 C250,60 250,20 300,20" fill="none" stroke="#00ff95" strokeWidth="2" vectorEffect="non-scaling-stroke"></path>
 </svg>
-{/* Grid Lines */}
+
 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
 <div className="w-full h-px bg-white/5"></div>
 <div className="w-full h-px bg-white/5"></div>
@@ -98,7 +98,7 @@ export default function Dashboard() {
 <span>18:00</span>
 </div>
 </div>
-{/* Risk Metrics Chart */}
+
 <div className="rounded-xl border border-border-dark bg-card-dark p-6 flex flex-col">
 <div className="flex justify-between items-start mb-6">
 <div>
@@ -111,7 +111,7 @@ export default function Dashboard() {
 <button className="text-secondary hover:text-white"><span className="material-symbols-outlined">more_horiz</span></button>
 </div>
 <div className="h-[180px] w-full relative">
-{/* Mock Chart SVG */}
+
 <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 300 100">
 <defs>
 <linearGradient id="riskGradient" x1="0" x2="0" y1="0" y2="1">
@@ -122,7 +122,7 @@ export default function Dashboard() {
 <path d="M0,90 C40,90 60,85 100,85 C140,85 160,88 200,88 C240,88 260,82 300,82 V100 H0 Z" fill="url(#riskGradient)"></path>
 <path d="M0,90 C40,90 60,85 100,85 C140,85 160,88 200,88 C240,88 260,82 300,82" fill="none" stroke="#8dceb3" strokeWidth="2" vectorEffect="non-scaling-stroke"></path>
 </svg>
-{/* Grid Lines */}
+
 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
 <div className="w-full h-px bg-white/5"></div>
 <div className="w-full h-px bg-white/5"></div>
@@ -139,7 +139,7 @@ export default function Dashboard() {
 </div>
 </div>
 </div>
-{/* Manual Override Sidebar */}
+
 <div className="lg:col-span-4 flex flex-col h-full">
 <div className="rounded-xl border border-border-dark bg-card-dark p-6 h-full flex flex-col">
 <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
@@ -157,7 +157,7 @@ export default function Dashboard() {
 </div>
 </div>
 <div className="flex-1 flex flex-col justify-center gap-6 py-4">
-{/* Emergency Pause Button */}
+
 <div className="group relative">
 <div className="absolute -inset-0.5 bg-gradient-to-r from-danger to-red-900 rounded-lg blur opacity-20 group-hover:opacity-50 transition duration-200"></div>
 <button className="relative w-full flex items-center justify-between bg-background-dark border border-danger/50 text-danger hover:bg-danger hover:text-white px-6 py-5 rounded-lg transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(255,59,48,0.3)]">
@@ -168,7 +168,7 @@ export default function Dashboard() {
 <span className="material-symbols-outlined text-3xl">gpp_bad</span>
 </button>
 </div>
-{/* Resume Button */}
+
 <div className="group relative">
 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-green-800 rounded-lg blur opacity-20 group-hover:opacity-50 transition duration-200"></div>
 <button className="relative w-full flex items-center justify-between bg-background-dark border border-primary/50 text-primary hover:bg-primary hover:text-background-dark px-6 py-5 rounded-lg transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(0,255,149,0.3)]">
@@ -204,7 +204,7 @@ export default function Dashboard() {
 </div>
 </div>
 </div>
-{/* Bottom Ticker */}
+
 <div className="mt-8 flex items-center gap-4 py-3 px-4 border-y border-white/5 bg-background-dark/30">
 <span className="text-xs font-bold text-primary uppercase whitespace-nowrap">Latest Blocks:</span>
 <div className="flex gap-8 overflow-hidden w-full relative">
