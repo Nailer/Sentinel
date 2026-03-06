@@ -1,0 +1,20 @@
+{
+  "name": "typescript-simple-template",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "private": true,
+  "scripts": {
+    "postinstall": "bun x cre-setup"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@chainlink/cre-sdk": "^1.1.1",
+    "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
+    "viem": "^2.47.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.21"
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { ethers } from "ethers";
 
 export default function Wizard() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -7,6 +8,40 @@ export default function Wizard() {
   const [withdrawalAlert, setWithdrawalAlert] = useState(100);
   const [vaultContract, setVaultContract] = useState("0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
   const [isVerified, setIsVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [contractBalance, setContractBalance] = useState("0.00");
+  const [networkName, setNetworkName] = useState("Sepolia Testnet");
+
+  const verifyContractOnChain = async () => {
+    if (!ethers.isAddress(vaultContract)) {
+      alert("Please enter a valid Ethereum address");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      // Connect to Sepolia testnet using ethers public provider
+      const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia.publicnode.com");
+
+      // Fetch network to confirm connection
+      const network = await provider.getNetwork();
+      setNetworkName(network.name === "sepolia" ? "Sepolia Testnet" : network.name);
+
+      // Fetch the balance of the inputted vault address
+      const balanceWei = await provider.getBalance(vaultContract);
+      const balanceEth = ethers.formatEther(balanceWei);
+      
+      // Format to 4 decimal places for clean UI
+      setContractBalance(parseFloat(balanceEth).toFixed(4));
+      
+      setIsVerified(true);
+    } catch (error) {
+      console.error("Failed to verify on-chain:", error);
+      alert("Failed to connect to network. Check the address and try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   return (
     <>
@@ -81,15 +116,18 @@ export default function Wizard() {
                           />
                           <span className={`material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-lg transition-colors ${isVerified ? "text-primary" : "text-slate-400 dark:text-slate-500"}`}>token</span>
                           <button 
-                            onClick={() => setIsVerified(true)}
+                            onClick={verifyContractOnChain}
+                            disabled={isVerifying}
                             className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider border transition-all duration-300 ${
                               isVerified 
                               ? "bg-primary/10 text-primary border-primary/20 shadow-[0_0_10px_rgba(0,255,153,0.2)] hover:bg-primary/20" 
                               : "bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500"
                             }`}
                           >
-                            <span className="material-symbols-outlined text-sm">{isVerified ? "check_circle" : "verified_user"}</span>
-                            {isVerified ? "Verified" : "Verify"}
+                            <span className={`material-symbols-outlined text-sm ${isVerifying ? 'animate-spin' : ''}`}>
+                                {isVerifying ? "sync" : (isVerified ? "check_circle" : "verified_user")}
+                            </span>
+                            {isVerifying ? "Checking..." : (isVerified ? "Verified" : "Verify")}
                           </button>
                         </div>
                       </label>
@@ -100,12 +138,12 @@ export default function Wizard() {
                             <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Network</p>
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                              <p className="text-sm font-medium text-slate-900 dark:text-white">Ethereum Mainnet</p>
+                              <p className="text-sm font-medium text-slate-900 dark:text-white capitalize">{networkName}</p>
                             </div>
                           </div>
                           <div className="bg-slate-100 dark:bg-[#1A1A1A] border border-slate-200 dark:border-white/10 rounded-lg p-3 flex-1 min-w-[140px]">
                             <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Current Balance</p>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white font-mono">1,240.55 ETH</p>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white font-mono">{contractBalance} ETH</p>
                           </div>
                         </div>
                       )}
@@ -221,7 +259,7 @@ export default function Wizard() {
                   </div>
                   
                   <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-black/20 p-6 rounded-lg border border-slate-200/50 dark:border-white/5">
-                    <p className="mb-4 text-base">You are about to deploy autonomous safeguarding for <span className="font-mono text-xs bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded">0x71C7...976F</span>.</p>
+                    <p className="mb-4 text-base">You are about to deploy autonomous safeguarding for <span className="font-mono text-xs bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded">{vaultContract.slice(0, 6)}...{vaultContract.slice(-4)}</span>.</p>
                     <ul className="flex flex-col gap-3">
                       <li className="flex items-center gap-3 text-sm">
                         <span className="material-symbols-outlined text-primary bg-primary/10 rounded-full p-0.5 text-[14px]">check</span>
