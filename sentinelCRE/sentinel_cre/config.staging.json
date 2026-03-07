@@ -4,6 +4,9 @@
   "evms": [
     {
       "tokenAddress": "0x4700A50d858Cb281847ca4Ee0938F80DEfB3F1dd",
+      "geminiApiKey": "AIzaSyCm-t15nbKEuqbdKDXQfGokAmUltuMgF2g",
+      "vaultAddress": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+      "sentinelAddress": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
       "porAddress": "0x073671aE6EAa2468c203fDE3a79dEe0836adF032",
       "proxyAddress": "0x696A180a2A1F5EAC7014D4ab4891CCB4184275fF",
       "balanceReaderAddress": "0x4b0739c94C1389B55481cb7506c62430cA7211Cf",
