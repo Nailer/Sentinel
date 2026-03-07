@@ -1,6 +1,6 @@
 {
   "schedule": "*/30 * * * * *",
-  "geminiApiKey": "AIzaSyCm-t15nbKEuqbdKDXQfGokAmUltuMgF2g",
+  "geminiApiKey": "AIzaSyBALEK0xS4latJ_BBjeY3dncNX3Ly_pBfI",
   "vaultAddress": "0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B",
   "sentinelAddress": "0xd0CC532F55cE6849D5b70E24d6188073F8921621",
   "balanceReaderAddress": "0x4b0739c94C1389B55481cb7506c62430cA7211Cf",

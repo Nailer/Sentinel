@@ -12,6 +12,7 @@ import {
   TxStatus,
   handler,
   CronCapability,
+  ignore,
 } from '@chainlink/cre-sdk'
 import { type Address, decodeFunctionResult, encodeFunctionData, zeroAddress } from 'viem'
 import { z } from 'zod'
@@ -42,17 +43,26 @@ const analyzeRiskWithGemini = (runtime: Runtime<Config>, balance: bigint): boole
   const aggregationResult = httpClient.sendRequest(runtime, (req) => {
     return req.sendRequest({
       method: 'POST',
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${runtime.config.geminiApiKey}`,
+      url: `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${runtime.config.geminiApiKey}`,
       body: Buffer.from(JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
       })).toString('base64')
     }).result();
-  }, ConsensusAggregationByFields({
-    body: (values: any[]) => values?.[0]?.body || new Uint8Array()
-  }))().result() as { body: Uint8Array };
+  }, ((values: any[]) => {
+    if (!values || values.length === 0) return { body: new Uint8Array(), statusCode: 0 };
+    return {
+      body: values[0].body || new Uint8Array(),
+      statusCode: values[0].statusCode || 0
+    };
+  }) as any)().result() as { body: Uint8Array, statusCode: number };
 
-  if (!aggregationResult || !aggregationResult.body) {
-    runtime.log("Gemini API Request failed or returned no data.");
+  runtime.log(`Aggregation Result: ${JSON.stringify(aggregationResult)}`);
+
+  if (aggregationResult.statusCode !== 200) {
+    runtime.log(`Gemini API Request failed with status: ${aggregationResult.statusCode}`);
+    if (aggregationResult.body && aggregationResult.body.length > 0) {
+      runtime.log(`Error Response: ${Buffer.from(aggregationResult.body).toString()}`);
+    }
     return false;
   }
 
