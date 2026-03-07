@@ -16,13 +16,14 @@ import {
 import { type Address, decodeFunctionResult, encodeFunctionData, zeroAddress } from 'viem'
 import { z } from 'zod'
 // Update your imports to match your new ABIs folder
-import { Sentinel, Vault, IERC20 } from '../contracts/abi'
+import { Sentinel, Vault, IERC20, BalanceReader } from '../contracts/abi'
 
 const configSchema = z.object({
   schedule: z.string(),
   geminiApiKey: z.string(), // Added for the AI
   vaultAddress: z.string(),
   sentinelAddress: z.string(),
+  balanceReaderAddress: z.string(),
   chainSelectorName: z.string(),
   gasLimit: z.string(),
 })
@@ -38,21 +39,32 @@ const analyzeRiskWithGemini = (runtime: Runtime<Config>, balance: bigint): boole
     Earlier today the balance was higher. If this looks like an abnormal drain, reply ONLY with the word "DANGER". 
     Otherwise, reply "SAFE".`;
 
-  const response = httpClient.sendRequest(runtime, (req) => {
+  const aggregationResult = httpClient.sendRequest(runtime, (req) => {
     return req.sendRequest({
       method: 'POST',
       url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${runtime.config.geminiApiKey}`,
-      body: JSON.stringify({
+      body: Buffer.from(JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
-      })
+      })).toString('base64')
     }).result();
   }, ConsensusAggregationByFields({
-    body: (values: any[]) => values[0].body
+    body: (values: any[]) => values?.[0]?.body || new Uint8Array()
   }))().result() as { body: Uint8Array };
 
-  const body = JSON.parse(Buffer.from(response.body).toString());
-  const aiText = body.candidates[0].content.parts[0].text.trim();
+  if (!aggregationResult || !aggregationResult.body) {
+    runtime.log("Gemini API Request failed or returned no data.");
+    return false;
+  }
 
+  const rawBody = Buffer.from(aggregationResult.body).toString();
+  const body = JSON.parse(rawBody);
+
+  if (!body.candidates || body.candidates.length === 0) {
+    runtime.log(`Gemini response error: ${rawBody}`);
+    return false;
+  }
+
+  const aiText = body.candidates[0].content.parts[0].text.trim();
   runtime.log(`Gemini Security Analysis: ${aiText}`);
   return aiText.includes("DANGER");
 }
@@ -62,17 +74,18 @@ const getVaultBalance = (runtime: Runtime<Config>): bigint => {
   const evmClient = new cre.capabilities.EVMClient(network.chainSelector.selector);
 
   const callData = encodeFunctionData({
-    abi: IERC20, // Vaults are usually ERC20 or have a balance function
-    functionName: 'balanceOf',
-    args: [runtime.config.vaultAddress as Address]
+    abi: BalanceReader,
+    functionName: 'getNativeBalances',
+    args: [[runtime.config.vaultAddress as Address]]
   });
 
   const result = evmClient.callContract(runtime, {
-    call: encodeCallMsg({ from: zeroAddress, to: runtime.config.vaultAddress as Address, data: callData }),
+    call: encodeCallMsg({ from: zeroAddress, to: runtime.config.balanceReaderAddress as Address, data: callData }),
     blockNumber: LAST_FINALIZED_BLOCK_NUMBER
   }).result();
 
-  return decodeFunctionResult({ abi: IERC20, functionName: 'balanceOf', data: bytesToHex(result.data) });
+  const balances = decodeFunctionResult({ abi: BalanceReader, functionName: 'getNativeBalances', data: bytesToHex(result.data) });
+  return balances[0];
 }
 
 const triggerEmergencyAction = (runtime: Runtime<Config>, isHack: boolean) => {

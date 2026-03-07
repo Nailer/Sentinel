@@ -11316,28 +11316,6 @@ class ConsensusImpl {
   }
   _usesUToForceShape(_) {}
 }
-function simpleDescriptor(agg) {
-  return create(ConsensusDescriptorSchema, {
-    descriptor: {
-      case: "aggregation",
-      value: agg
-    }
-  });
-}
-function median() {
-  return new ConsensusFieldAggregation(simpleDescriptor(AggregationType.MEDIAN));
-}
-
-class ConsensusFieldAggregation {
-  fieldDescriptor;
-  t;
-  u;
-  constructor(fieldDescriptor, t, u) {
-    this.fieldDescriptor = fieldDescriptor;
-    this.t = t;
-    this.u = u;
-  }
-}
 function ConsensusAggregationByFields(aggregation) {
   const fieldMap = create(FieldsMapSchema);
   Object.keys(aggregation).forEach((key) => {
@@ -16253,48 +16231,6 @@ var sendErrorResponse = (error) => {
   }
   hostBindings.sendResponse(payload);
 };
-init_base();
-
-class InvalidDecimalNumberError extends BaseError {
-  constructor({ value: value2 }) {
-    super(`Number \`${value2}\` is not a valid decimal number.`, {
-      name: "InvalidDecimalNumberError"
-    });
-  }
-}
-function parseUnits(value2, decimals) {
-  if (!/^(-?)([0-9]*)\.?([0-9]*)$/.test(value2))
-    throw new InvalidDecimalNumberError({ value: value2 });
-  let [integer, fraction = "0"] = value2.split(".");
-  const negative = integer.startsWith("-");
-  if (negative)
-    integer = integer.slice(1);
-  fraction = fraction.replace(/(0+)$/, "");
-  if (decimals === 0) {
-    if (Math.round(Number(`.${fraction}`)) === 1)
-      integer = `${BigInt(integer) + 1n}`;
-    fraction = "";
-  } else if (fraction.length > decimals) {
-    const [left, unit, right] = [
-      fraction.slice(0, decimals - 1),
-      fraction.slice(decimals - 1, decimals),
-      fraction.slice(decimals)
-    ];
-    const rounded = Math.round(Number(`${unit}.${right}`));
-    if (rounded > 9)
-      fraction = `${BigInt(left) + BigInt(1)}0`.padStart(left.length + 1, "0");
-    else
-      fraction = `${left}${rounded}`;
-    if (fraction.length > decimals) {
-      fraction = fraction.slice(1);
-      integer = `${BigInt(integer) + 1n}`;
-    }
-    fraction = fraction.slice(0, decimals);
-  } else {
-    fraction = fraction.padEnd(decimals, "0");
-  }
-  return BigInt(`${negative ? "-" : ""}${integer}${fraction}`);
-}
 var zeroAddress = "0x0000000000000000000000000000000000000000";
 init_decodeFunctionResult();
 init_encodeFunctionData();
@@ -29754,202 +29690,32 @@ var BalanceReader = [
     type: "function"
   }
 ];
-var IERC20 = [
+var Sentinel = [
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
         internalType: "address",
-        name: "owner",
+        name: "_creForwarder",
         type: "address"
       },
       {
-        indexed: true,
         internalType: "address",
-        name: "spender",
+        name: "_vault",
         type: "address"
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256"
       }
     ],
-    name: "Approval",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "from", type: "address" },
-      { indexed: true, internalType: "address", name: "to", type: "address" },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256"
-      }
-    ],
-    name: "Transfer",
-    type: "event"
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "owner", type: "address" },
-      { internalType: "address", name: "spender", type: "address" }
-    ],
-    name: "allowance",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "spender", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" }
-    ],
-    name: "approve",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    inputs: [{ internalType: "address", name: "account", type: "address" }],
-    name: "balanceOf",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [],
-    name: "totalSupply",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function"
+    type: "constructor"
   },
   {
     inputs: [
-      { internalType: "address", name: "recipient", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" }
-    ],
-    name: "transfer",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "sender", type: "address" },
-      { internalType: "address", name: "recipient", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" }
-    ],
-    name: "transferFrom",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function"
-  }
-];
-var MessageEmitter = [
-  {
-    anonymous: false,
-    inputs: [
       {
-        indexed: true,
-        internalType: "address",
-        name: "emitter",
-        type: "address"
-      },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256"
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "message",
-        type: "string"
+        internalType: "bytes",
+        name: "report",
+        type: "bytes"
       }
     ],
-    name: "MessageEmitted",
-    type: "event"
-  },
-  {
-    inputs: [{ internalType: "string", name: "message", type: "string" }],
-    name: "emitMessage",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    inputs: [{ internalType: "address", name: "emitter", type: "address" }],
-    name: "getLastMessage",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "emitter", type: "address" },
-      { internalType: "uint256", name: "timestamp", type: "uint256" }
-    ],
-    name: "getMessage",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [],
-    name: "typeAndVersion",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function"
-  }
-];
-var ReserveManager = [
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "requestId",
-        type: "uint256"
-      }
-    ],
-    name: "RequestReserveUpdate",
-    type: "event"
-  },
-  {
-    inputs: [],
-    name: "lastTotalMinted",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [],
-    name: "lastTotalReserve",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: "uint256", name: "totalMinted", type: "uint256" },
-          { internalType: "uint256", name: "totalReserve", type: "uint256" }
-        ],
-        internalType: "struct UpdateReserves",
-        name: "updateReserves",
-        type: "tuple"
-      }
-    ],
-    name: "updateReserves",
+    name: "onReport",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function"
@@ -29957,228 +29723,102 @@ var ReserveManager = [
 ];
 var configSchema = exports_external2.object({
   schedule: exports_external2.string(),
-  url: exports_external2.string(),
-  evms: exports_external2.array(exports_external2.object({
-    tokenAddress: exports_external2.string(),
-    porAddress: exports_external2.string(),
-    proxyAddress: exports_external2.string(),
-    balanceReaderAddress: exports_external2.string(),
-    messageEmitterAddress: exports_external2.string(),
-    chainSelectorName: exports_external2.string(),
-    gasLimit: exports_external2.string()
-  }))
+  geminiApiKey: exports_external2.string(),
+  vaultAddress: exports_external2.string(),
+  sentinelAddress: exports_external2.string(),
+  balanceReaderAddress: exports_external2.string(),
+  chainSelectorName: exports_external2.string(),
+  gasLimit: exports_external2.string()
 });
-var safeJsonStringify = (obj) => JSON.stringify(obj, (_, value2) => typeof value2 === "bigint" ? value2.toString() : value2, 2);
-var fetchReserveInfo = (sendRequester, config2) => {
-  const response = sendRequester.sendRequest({ method: "GET", url: config2.url }).result();
-  if (response.statusCode !== 200) {
-    throw new Error(`HTTP request failed with status: ${response.statusCode}`);
+var analyzeRiskWithGemini = (runtime2, balance) => {
+  const httpClient = new cre.capabilities.HTTPClient;
+  const prompt = `You are a DeFi Security Agent. The current vault balance is ${balance.toString()} units. 
+    Earlier today the balance was higher. If this looks like an abnormal drain, reply ONLY with the word "DANGER". 
+    Otherwise, reply "SAFE".`;
+  const aggregationResult = httpClient.sendRequest(runtime2, (req) => {
+    return req.sendRequest({
+      method: "POST",
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${runtime2.config.geminiApiKey}`,
+      body: Buffer.from(JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })).toString("base64")
+    }).result();
+  }, ConsensusAggregationByFields({
+    body: (values) => values?.[0]?.body || new Uint8Array
+  }))().result();
+  if (!aggregationResult || !aggregationResult.body) {
+    runtime2.log("Gemini API Request failed or returned no data.");
+    return false;
   }
-  const responseText = Buffer.from(response.body).toString("utf-8");
-  const porResp = JSON.parse(responseText);
-  if (porResp.ripcord) {
-    throw new Error("ripcord is true");
+  const rawBody = Buffer.from(aggregationResult.body).toString();
+  const body = JSON.parse(rawBody);
+  if (!body.candidates || body.candidates.length === 0) {
+    runtime2.log(`Gemini response error: ${rawBody}`);
+    return false;
   }
-  return {
-    lastUpdated: new Date(porResp.updatedAt),
-    totalReserve: porResp.totalToken
-  };
+  const aiText = body.candidates[0].content.parts[0].text.trim();
+  runtime2.log(`Gemini Security Analysis: ${aiText}`);
+  return aiText.includes("DANGER");
 };
-var fetchNativeTokenBalance = (runtime2, evmConfig, tokenHolderAddress) => {
-  const network248 = getNetwork({
-    chainFamily: "evm",
-    chainSelectorName: evmConfig.chainSelectorName,
-    isTestnet: true
-  });
-  if (!network248) {
-    throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`);
-  }
+var getVaultBalance = (runtime2) => {
+  const network248 = getNetwork({ chainFamily: "evm", chainSelectorName: runtime2.config.chainSelectorName, isTestnet: true });
   const evmClient = new cre.capabilities.EVMClient(network248.chainSelector.selector);
   const callData = encodeFunctionData({
     abi: BalanceReader,
     functionName: "getNativeBalances",
-    args: [[tokenHolderAddress]]
+    args: [[runtime2.config.vaultAddress]]
   });
-  const contractCall = evmClient.callContract(runtime2, {
-    call: encodeCallMsg({
-      from: zeroAddress,
-      to: evmConfig.balanceReaderAddress,
-      data: callData
-    }),
+  const result = evmClient.callContract(runtime2, {
+    call: encodeCallMsg({ from: zeroAddress, to: runtime2.config.balanceReaderAddress, data: callData }),
     blockNumber: LAST_FINALIZED_BLOCK_NUMBER
   }).result();
-  const balances = decodeFunctionResult({
-    abi: BalanceReader,
-    functionName: "getNativeBalances",
-    data: bytesToHex(contractCall.data)
-  });
-  if (!balances || balances.length === 0) {
-    throw new Error("No balances returned from contract");
-  }
+  const balances = decodeFunctionResult({ abi: BalanceReader, functionName: "getNativeBalances", data: bytesToHex(result.data) });
   return balances[0];
 };
-var getTotalSupply = (runtime2) => {
-  const evms = runtime2.config.evms;
-  let totalSupply = 0n;
-  for (const evmConfig of evms) {
-    const network248 = getNetwork({
-      chainFamily: "evm",
-      chainSelectorName: evmConfig.chainSelectorName,
-      isTestnet: true
-    });
-    if (!network248) {
-      throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`);
-    }
-    const evmClient = new cre.capabilities.EVMClient(network248.chainSelector.selector);
-    const callData = encodeFunctionData({
-      abi: IERC20,
-      functionName: "totalSupply"
-    });
-    const contractCall = evmClient.callContract(runtime2, {
-      call: encodeCallMsg({
-        from: zeroAddress,
-        to: evmConfig.tokenAddress,
-        data: callData
-      }),
-      blockNumber: LAST_FINALIZED_BLOCK_NUMBER
-    }).result();
-    const supply = decodeFunctionResult({
-      abi: IERC20,
-      functionName: "totalSupply",
-      data: bytesToHex(contractCall.data)
-    });
-    totalSupply += supply;
-  }
-  return totalSupply;
-};
-var updateReserves = (runtime2, totalSupply, totalReserveScaled) => {
-  const evmConfig = runtime2.config.evms[0];
-  const network248 = getNetwork({
-    chainFamily: "evm",
-    chainSelectorName: evmConfig.chainSelectorName,
-    isTestnet: true
-  });
-  if (!network248) {
-    throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`);
-  }
+var triggerEmergencyAction = (runtime2, isHack) => {
+  const network248 = getNetwork({ chainFamily: "evm", chainSelectorName: runtime2.config.chainSelectorName, isTestnet: true });
   const evmClient = new cre.capabilities.EVMClient(network248.chainSelector.selector);
-  runtime2.log(`Updating reserves totalSupply ${totalSupply.toString()} totalReserveScaled ${totalReserveScaled.toString()}`);
   const callData = encodeFunctionData({
-    abi: ReserveManager,
-    functionName: "updateReserves",
-    args: [
-      {
-        totalMinted: totalSupply,
-        totalReserve: totalReserveScaled
-      }
-    ]
+    abi: Sentinel,
+    functionName: "onReport",
+    args: [encodeFunctionData({
+      abi: Sentinel,
+      functionName: "onReport",
+      args: [isHack ? "0x01" : "0x00"]
+    })]
   });
-  const reportResponse = runtime2.report({
+  const report2 = runtime2.report({
     encodedPayload: hexToBase64(callData),
     encoderName: "evm",
     signingAlgo: "ecdsa",
     hashingAlgo: "keccak256"
   }).result();
-  const resp = evmClient.writeReport(runtime2, {
-    receiver: evmConfig.proxyAddress,
-    report: reportResponse,
-    gasConfig: {
-      gasLimit: evmConfig.gasLimit
-    }
+  const tx = evmClient.writeReport(runtime2, {
+    receiver: runtime2.config.sentinelAddress,
+    report: report2,
+    gasConfig: { gasLimit: runtime2.config.gasLimit }
   }).result();
-  const txStatus = resp.txStatus;
-  if (txStatus !== TxStatus.SUCCESS) {
-    throw new Error(`Failed to write report: ${resp.errorMessage || txStatus}`);
+  if (tx.txStatus === TxStatus.SUCCESS) {
+    runtime2.log(`SENTINEL ACTION: Vault security status updated! Hash: ${bytesToHex(tx.txHash)}`);
   }
-  const txHash = resp.txHash || new Uint8Array(32);
-  runtime2.log(`Write report transaction succeeded at txHash: ${bytesToHex(txHash)}`);
-  return txHash.toString();
-};
-var doPOR = (runtime2) => {
-  runtime2.log(`fetching por url ${runtime2.config.url}`);
-  const httpCapability = new cre.capabilities.HTTPClient;
-  const reserveInfo = httpCapability.sendRequest(runtime2, fetchReserveInfo, ConsensusAggregationByFields({
-    lastUpdated: median,
-    totalReserve: median
-  }))(runtime2.config).result();
-  runtime2.log(`ReserveInfo ${safeJsonStringify(reserveInfo)}`);
-  const totalSupply = getTotalSupply(runtime2);
-  runtime2.log(`TotalSupply ${totalSupply.toString()}`);
-  const totalReserveScaled = parseUnits(reserveInfo.totalReserve.toString(), 18);
-  runtime2.log(`TotalReserveScaled ${totalReserveScaled.toString()}`);
-  const nativeTokenBalance = fetchNativeTokenBalance(runtime2, runtime2.config.evms[0], runtime2.config.evms[0].tokenAddress);
-  runtime2.log(`NativeTokenBalance ${nativeTokenBalance.toString()}`);
-  updateReserves(runtime2, totalSupply, totalReserveScaled);
-  return reserveInfo.totalReserve.toString();
-};
-var getLastMessage = (runtime2, evmConfig, emitter) => {
-  const network248 = getNetwork({
-    chainFamily: "evm",
-    chainSelectorName: evmConfig.chainSelectorName,
-    isTestnet: true
-  });
-  if (!network248) {
-    throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`);
-  }
-  const evmClient = new cre.capabilities.EVMClient(network248.chainSelector.selector);
-  const callData = encodeFunctionData({
-    abi: MessageEmitter,
-    functionName: "getLastMessage",
-    args: [emitter]
-  });
-  const contractCall = evmClient.callContract(runtime2, {
-    call: encodeCallMsg({
-      from: zeroAddress,
-      to: evmConfig.messageEmitterAddress,
-      data: callData
-    }),
-    blockNumber: LAST_FINALIZED_BLOCK_NUMBER
-  }).result();
-  const message = decodeFunctionResult({
-    abi: MessageEmitter,
-    functionName: "getLastMessage",
-    data: bytesToHex(contractCall.data)
-  });
-  return message;
 };
 var onCronTrigger = (runtime2, payload) => {
-  if (!payload.scheduledExecutionTime) {
-    throw new Error("Scheduled execution time is required");
+  runtime2.log("Sentinel Patrol: Starting Security Scan...");
+  const balance = getVaultBalance(runtime2);
+  runtime2.log(`Vault Balance: ${balance.toString()}`);
+  const isHackDetected = analyzeRiskWithGemini(runtime2, balance);
+  if (isHackDetected) {
+    runtime2.log("\uD83D\uDEA8 HACK DETECTED BY GEMINI! Triggering Emergency Pause...");
+    triggerEmergencyAction(runtime2, true);
+  } else {
+    runtime2.log("✅ Vault is secure. No action needed.");
   }
-  runtime2.log("Running CronTrigger");
-  return doPOR(runtime2);
-};
-var onLogTrigger = (runtime2, payload) => {
-  runtime2.log("Running LogTrigger");
-  const topics = payload.topics;
-  if (topics.length < 3) {
-    runtime2.log("Log payload does not contain enough topics");
-    throw new Error(`log payload does not contain enough topics ${topics.length}`);
-  }
-  const emitter = bytesToHex(topics[1].slice(12));
-  runtime2.log(`Emitter ${emitter}`);
-  const message = getLastMessage(runtime2, runtime2.config.evms[0], emitter);
-  runtime2.log(`Message retrieved from the contract ${message}`);
-  return message;
+  return "Scan Complete";
 };
 var initWorkflow = (config2) => {
-  const cronTrigger = new cre.capabilities.CronCapability;
-  const network248 = getNetwork({
-    chainFamily: "evm",
-    chainSelectorName: config2.evms[0].chainSelectorName,
-    isTestnet: true
-  });
-  if (!network248) {
-    throw new Error(`Network not found for chain selector name: ${config2.evms[0].chainSelectorName}`);
-  }
-  const evmClient = new cre.capabilities.EVMClient(network248.chainSelector.selector);
+  const cron = new CronCapability;
   return [
-    cre.handler(cronTrigger.trigger({
-      schedule: config2.schedule
-    }), onCronTrigger),
-    cre.handler(evmClient.logTrigger({
-      addresses: [hexToBase64(config2.evms[0].messageEmitterAddress)]
-    }), onLogTrigger)
+    handler(cron.trigger({ schedule: config2.schedule }), onCronTrigger)
   ];
 };
 async function main() {

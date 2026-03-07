@@ -1,18 +1,18 @@
 {
   "schedule": "*/30 * * * * *",
+  "geminiApiKey": "AIzaSyCm-t15nbKEuqbdKDXQfGokAmUltuMgF2g",
+  "vaultAddress": "0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B",
+  "sentinelAddress": "0xd0CC532F55cE6849D5b70E24d6188073F8921621",
+  "balanceReaderAddress": "0x4b0739c94C1389B55481cb7506c62430cA7211Cf",
+  "chainSelectorName": "ethereum-testnet-sepolia",
+  "gasLimit": "1000000",
   "url": "https://api.real-time-reserves.verinumus.io/v1/chainlink/proof-of-reserves/TrueUSD",
   "evms": [
     {
       "tokenAddress": "0x4700A50d858Cb281847ca4Ee0938F80DEfB3F1dd",
-      "geminiApiKey": "AIzaSyCm-t15nbKEuqbdKDXQfGokAmUltuMgF2g",
-      "vaultAddress": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
-      "sentinelAddress": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
       "porAddress": "0x073671aE6EAa2468c203fDE3a79dEe0836adF032",
       "proxyAddress": "0x696A180a2A1F5EAC7014D4ab4891CCB4184275fF",
-      "balanceReaderAddress": "0x4b0739c94C1389B55481cb7506c62430cA7211Cf",
-      "messageEmitterAddress": "0x1d598672486ecB50685Da5497390571Ac4E93FDc",
-      "chainSelectorName": "ethereum-testnet-sepolia",
-      "gasLimit": "1000000"
+      "messageEmitterAddress": "0x1d598672486ecB50685Da5497390571Ac4E93FDc"
     }
   ]
 }
