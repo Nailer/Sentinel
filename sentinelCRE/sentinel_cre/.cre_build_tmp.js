@@ -29697,46 +29697,52 @@ var configSchema = exports_external2.object({
   sentinelAddress: exports_external2.string(),
   balanceReaderAddress: exports_external2.string(),
   chainSelectorName: exports_external2.string(),
-  gasLimit: exports_external2.string()
+  gasLimit: exports_external2.string(),
+  threshold: exports_external2.number(),
+  baselineBalance: exports_external2.string().optional()
 });
-var analyzeRiskWithGemini = (runtime2, balance) => {
+var analyzeRiskWithGemini = (runtime2, currentBalance) => {
   const httpClient = new cre.capabilities.HTTPClient;
-  const prompt = `You are a DeFi Security Agent. The current vault balance is ${balance.toString()} units. 
-    Earlier today the balance was higher. If this looks like an abnormal drain, reply ONLY with the word "DANGER". 
-    Otherwise, reply "SAFE".`;
+  const userThreshold = runtime2.config.threshold;
+  const previousBalance = runtime2.config.baselineBalance || currentBalance;
+  const prompt = `You are the Sentinel DeFi Security Agent. 
+    CONTEXT:
+    - User's Risk Threshold: ${userThreshold}%
+    - Previous Vault Balance: ${previousBalance.toString()}
+    - Current Vault Balance: ${currentBalance.toString()}
+
+    TASK:
+    1. Calculate the percentage drop between the previous and current balance.
+    2. If the drop is EQUAL TO or GREATER THAN ${userThreshold}%, reply exactly with "DANGER".
+    3. If the drop is less than the threshold, reply "SAFE".
+    4. Provide a brief 1-sentence technical reason for your decision.`;
   const aggregationResult = httpClient.sendRequest(runtime2, (req) => {
     return req.sendRequest({
       method: "POST",
       url: `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${runtime2.config.geminiApiKey}`,
-      body: Buffer.from(JSON.stringify({
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
-      })).toString("base64")
+      })
     }).result();
   }, (values) => {
     if (!values || values.length === 0)
       return { body: new Uint8Array, statusCode: 0 };
-    return {
-      body: values[0].body || new Uint8Array,
-      statusCode: values[0].statusCode || 0
-    };
+    return values[0];
   })().result();
-  runtime2.log(`Aggregation Result: ${JSON.stringify(aggregationResult)}`);
   if (aggregationResult.statusCode !== 200) {
-    runtime2.log(`Gemini API Request failed with status: ${aggregationResult.statusCode}`);
-    if (aggregationResult.body && aggregationResult.body.length > 0) {
-      runtime2.log(`Error Response: ${Buffer.from(aggregationResult.body).toString()}`);
-    }
+    runtime2.log(`Gemini API Error: Status ${aggregationResult.statusCode}`);
     return false;
   }
   const rawBody = Buffer.from(aggregationResult.body).toString();
   const body = JSON.parse(rawBody);
   if (!body.candidates || body.candidates.length === 0) {
-    runtime2.log(`Gemini response error: ${rawBody}`);
+    runtime2.log(`Gemini Response empty: ${rawBody}`);
     return false;
   }
   const aiText = body.candidates[0].content.parts[0].text.trim();
-  runtime2.log(`Gemini Security Analysis: ${aiText}`);
-  return aiText.includes("DANGER");
+  runtime2.log(`[SENTINEL AI ANALYSIS]: ${aiText}`);
+  return aiText.toUpperCase().includes("DANGER");
 };
 var getVaultBalance = (runtime2) => {
   const network248 = getNetwork({ chainFamily: "evm", chainSelectorName: runtime2.config.chainSelectorName, isTestnet: true });
@@ -29807,5 +29813,7 @@ async function main() {
 }
 main().catch(sendErrorResponse);
 export {
-  main
+  onCronTrigger,
+  main,
+  initWorkflow
 };
