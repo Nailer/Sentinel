@@ -131,6 +131,27 @@ Navigate to `http://localhost:3000` (or `3001` if port 3000 is occupied).
 4. **AI Analysis**: Data is sent to Gemini, which calculates risk based on user-defined thresholds.
 5. **Guardian Action**: If a threat is detected, the CRE node automatically submits a transaction to the `Sentinel.sol` contract to protect the protocol.
 
+## 🧪 CRE Simulation (Backend Engine)
+If you want to test the autonomous security engine without the frontend, you can run a local simulation of the Chainlink Runtime Environment logic.
+
+1.  **Navigate to the CRE folder**:
+    ```bash
+    cd sentinel-web/sentinelCRE/sentinel_cre
+    ```
+2.  **Run the simulation**:
+    ```bash
+    cre workflow simulate workflow.yaml --target=staging-settings
+    ```
+    This will execute the security loop, fetch on-chain balances using Chainlink Capabilities, pass the data to Gemini AI, and show you the decided action in the terminal.
+
+---
+
+## 🏛️ Note for Judges
+Sentinel CRE was built to solve the "Reactive Security" problem in DeFi. Most protocols today rely on manual multisig pauses that take hours. Sentinel is:
+- **Autonomous**: It runs 24/7 on the Chainlink CRE without human intervention.
+- **Reason-Capable**: By using Gemini 2.0 Flash, it doesn't just look at numbers; it "reasons" through the volatility to ensure circuit breakers aren't triggered by normal market moves.
+- **Interoperable**: It uses Chainlink's BalanceReader capability to monitor any vault across any linked chain.
+
 ---
 
 ## 📄 License
