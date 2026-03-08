@@ -1,6 +1,8 @@
 {
   "schedule": "*/30 * * * * *",
   "geminiApiKey": "REPLACE_WITH_YOUR_GEMINI_API_KEY",
+  "baselineBalance": "10000000000000000000",
+  "threshold": 10,
   "vaultAddress": "0x0000000000000000000000000000000000000000",
   "sentinelAddress": "0x0000000000000000000000000000000000000000",
   "balanceReaderAddress": "0x4b0739c94C1389B55481cb7506c62430cA7211Cf",

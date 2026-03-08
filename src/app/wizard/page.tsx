@@ -1,16 +1,36 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ethers } from "ethers";
 
 export default function Wizard() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [tvlDrop, setTvlDrop] = useState(20);
+  const [tvlDrop, setTvlDrop] = useState(10);
   const [withdrawalAlert, setWithdrawalAlert] = useState(100);
-  const [vaultContract, setVaultContract] = useState("0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
+  const [vaultContract, setVaultContract] = useState("0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B");
+  const [sentinelAddress, setSentinelAddress] = useState("0xd0CC532F55cE6849D5b70E24d6188073F8921621");
   const [isVerified, setIsVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [contractBalance, setContractBalance] = useState("0.00");
   const [networkName, setNetworkName] = useState("Sepolia Testnet");
+
+  const handleActivate = () => {
+    // Save the config to localStorage to pass it to the AI Logs page
+    const sentinelConfig = {
+      vaultAddress: vaultContract,
+      threshold: tvlDrop,
+      sentinelAddress: sentinelAddress,
+      withdrawalAlert: withdrawalAlert,
+      contractBalance: contractBalance, // Added this
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('sentinel_config', JSON.stringify(sentinelConfig));
+    
+    // Redirect with the 'active' flag to trigger the live terminal animation
+    router.push('/ai-logs?active=true');
+  };
 
   const verifyContractOnChain = async () => {
     if (!ethers.isAddress(vaultContract)) {
@@ -276,7 +296,10 @@ export default function Wizard() {
                     </ul>
                   </div>
                   
-                  <button className="group w-full bg-primary hover:bg-[#33ffad] active:bg-[#00cc7a] text-background-dark h-14 md:h-16 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-[0_0_20px_rgba(0,255,153,0.3)] hover:shadow-[0_0_30px_rgba(0,255,153,0.5)] mt-4">
+                  <button 
+                    onClick={handleActivate}
+                    className="group w-full bg-primary hover:bg-[#33ffad] active:bg-[#00cc7a] text-background-dark h-14 md:h-16 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-[0_0_20px_rgba(0,255,153,0.3)] hover:shadow-[0_0_30px_rgba(0,255,153,0.5)] mt-4"
+                  >
                     <span className="material-symbols-outlined text-[24px]">power_settings_new</span>
                     <span>Activate Sentinel Shield</span>
                   </button>

@@ -41,4 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 /sentinelCRE/sentinel_cre/node_modules
+/sentinel-contracts/node_modules
 

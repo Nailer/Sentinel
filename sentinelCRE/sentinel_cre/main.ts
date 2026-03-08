@@ -27,56 +27,70 @@ const configSchema = z.object({
   balanceReaderAddress: z.string(),
   chainSelectorName: z.string(),
   gasLimit: z.string(),
+  threshold: z.number(), // e.g., 10 for 10%
+  baselineBalance: z.string().optional(),
 })
 
-type Config = z.infer<typeof configSchema>
+export type Config = z.infer<typeof configSchema>
 
 // The AI Role: It receives the current state and decides if a hack is occurring
-const analyzeRiskWithGemini = (runtime: Runtime<Config>, balance: bigint): boolean => {
+const analyzeRiskWithGemini = (runtime: Runtime<Config>, currentBalance: bigint): boolean => {
   const httpClient = new cre.capabilities.HTTPClient();
 
-  // We prompt Gemini as a security expert
-  const prompt = `You are a DeFi Security Agent. The current vault balance is ${balance.toString()} units. 
-    Earlier today the balance was higher. If this looks like an abnormal drain, reply ONLY with the word "DANGER". 
-    Otherwise, reply "SAFE".`;
+  const userThreshold = runtime.config.threshold; // e.g., 10 for 10%
+  const previousBalance = runtime.config.baselineBalance || currentBalance;
 
+  // 2. The "Security Expert" Prompt
+  // We give Gemini the math so it can provide the reasoning.
+  const prompt = `You are the Sentinel DeFi Security Agent. 
+    CONTEXT:
+    - User's Risk Threshold: ${userThreshold}%
+    - Previous Vault Balance: ${previousBalance.toString()}
+    - Current Vault Balance: ${currentBalance.toString()}
+
+    TASK:
+    1. Calculate the percentage drop between the previous and current balance.
+    2. If the drop is EQUAL TO or GREATER THAN ${userThreshold}%, reply exactly with "DANGER".
+    3. If the drop is less than the threshold, reply "SAFE".
+    4. Provide a brief 1-sentence technical reason for your decision.`;
+
+  // 3. The HTTP Call (Using the CRE HTTP Capability)
   const aggregationResult = httpClient.sendRequest(runtime, (req) => {
     return req.sendRequest({
       method: 'POST',
       url: `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${runtime.config.geminiApiKey}`,
-      body: Buffer.from(JSON.stringify({
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
-      })).toString('base64')
+      })
     }).result();
   }, ((values: any[]) => {
+    // Simple consensus: take the first successful response
     if (!values || values.length === 0) return { body: new Uint8Array(), statusCode: 0 };
-    return {
-      body: values[0].body || new Uint8Array(),
-      statusCode: values[0].statusCode || 0
-    };
+    return values[0];
   }) as any)().result() as { body: Uint8Array, statusCode: number };
 
-  runtime.log(`Aggregation Result: ${JSON.stringify(aggregationResult)}`);
-
+  // 4. Response Handling & Logic
   if (aggregationResult.statusCode !== 200) {
-    runtime.log(`Gemini API Request failed with status: ${aggregationResult.statusCode}`);
-    if (aggregationResult.body && aggregationResult.body.length > 0) {
-      runtime.log(`Error Response: ${Buffer.from(aggregationResult.body).toString()}`);
-    }
-    return false;
+    runtime.log(`Gemini API Error: Status ${aggregationResult.statusCode}`);
+    return false; // Default to safe if API is down to prevent false positives
   }
 
   const rawBody = Buffer.from(aggregationResult.body).toString();
   const body = JSON.parse(rawBody);
 
   if (!body.candidates || body.candidates.length === 0) {
-    runtime.log(`Gemini response error: ${rawBody}`);
+    runtime.log(`Gemini Response empty: ${rawBody}`);
     return false;
   }
 
   const aiText = body.candidates[0].content.parts[0].text.trim();
-  runtime.log(`Gemini Security Analysis: ${aiText}`);
-  return aiText.includes("DANGER");
+
+  // Log the AI's reasoning so it shows up in your Video Demo!
+  runtime.log(`[SENTINEL AI ANALYSIS]: ${aiText}`);
+
+  // Return true (HACK DETECTED) only if Gemini flags DANGER
+  return aiText.toUpperCase().includes("DANGER");
 }
 
 const getVaultBalance = (runtime: Runtime<Config>): bigint => {
@@ -131,7 +145,7 @@ const triggerEmergencyAction = (runtime: Runtime<Config>, isHack: boolean) => {
   }
 }
 
-const onCronTrigger = (runtime: Runtime<Config>, payload: CronPayload): string => {
+export const onCronTrigger = (runtime: Runtime<Config>, payload: CronPayload): string => {
   runtime.log('Sentinel Patrol: Starting Security Scan...');
 
   // 1. Fetch current on-chain data
@@ -152,7 +166,7 @@ const onCronTrigger = (runtime: Runtime<Config>, payload: CronPayload): string =
   return "Scan Complete";
 }
 
-const initWorkflow = (config: Config) => {
+export const initWorkflow = (config: Config) => {
   const cron = new CronCapability()
 
   return [

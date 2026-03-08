@@ -1,4 +1,6 @@
 
+import Link from "next/link";
+
 export default function LandingPage() {
   return (
     <div>
@@ -27,13 +29,13 @@ export default function LandingPage() {
                             </p>
 </div>
 <div className="flex flex-col sm:flex-row gap-4">
-<button className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors shadow-[0_0_20px_rgba(0,255,149,0.3)]">
+<Link href="/wizard" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors shadow-[0_0_20px_rgba(0,255,149,0.3)]">
 <span className="truncate">Register Protocol Vault</span>
 <span className="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
-</button>
-<button className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-transparent border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-base font-medium leading-normal tracking-[0.015em] hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors">
-<span className="truncate">View Documentation</span>
-</button>
+</Link>
+<Link href="/ai-logs" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-transparent border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-base font-medium leading-normal tracking-[0.015em] hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors">
+<span className="truncate">View AI Reasoning</span>
+</Link>
 </div>
 <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mt-2">
 <div className="flex -space-x-2">
