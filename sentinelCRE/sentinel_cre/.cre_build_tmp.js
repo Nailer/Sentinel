@@ -29721,9 +29721,9 @@ var analyzeRiskWithGemini = (runtime2, currentBalance) => {
       method: "POST",
       url: `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${runtime2.config.geminiApiKey}`,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      body: Buffer.from(JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
-      })
+      })).toString("base64")
     }).result();
   }, (values) => {
     if (!values || values.length === 0)
