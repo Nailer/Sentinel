@@ -5,17 +5,14 @@ export type Config = {
   schedule: string;
 };
 
-// 1. Risk Sensitivity Configuration (from Wizard dashboard logic)
-const DROP_THRESHOLD_PERCENT = 20; // 20% TVL drop threshold
-const LARGE_WITHDRAWAL_ALERT_ETH = 10; // 10 ETH abrupt drop
 
-/**
- * Autonomous Monitor Logic
- * Replicated from sentinel-cre-agent/index.ts
- */
+const DROP_THRESHOLD_PERCENT = 20;
+const LARGE_WITHDRAWAL_ALERT_ETH = 10;
+
+
 export const onCronTrigger = async (runtime: Runtime<Config>) => {
-  // In CRE, secrets and config are preferred over process.env, 
-  // but we'll use process.env to stay consistent with the original agent's replication requirement.
+
+
   const PRIVATE_KEY = process.env.PRIVATE_KEY as string;
   const RPC_URL = process.env.RPC_URL || "https://ethereum-sepolia.publicnode.com";
   const VAULT_ADDRESS = process.env.VAULT_ADDRESS as string;
@@ -38,25 +35,25 @@ export const onCronTrigger = async (runtime: Runtime<Config>) => {
 
     runtime.log(`      Current Balance: ${currentEth.toFixed(4)} ETH`);
 
-    // Note: In this stateless cron trigger version, we fetch the "baseline" 
-    // synchronously, or you could pull it from a state-capability if available.
-    // For replication, we'll assume we check against the same logic.
-    // To fully replicate the "baseline" state across triggers, we'd need a storage layer.
-    // Here we'll simulate the check.
 
-    // (Self-correction: If we want to detect a DROP, we need a previous value. 
-    // In many Sentinel CREs, the baseline is either fixed or fetched from a contract.)
 
-    // For now, let's keep the logic structure as requested.
+
+
+
+
+
+
+
+
     let hackDetected = false;
     let triggerReason = "";
 
-    // In a real run, baselineEth would be fetched from a storage or prev state.
-    // For this replication, we'll use a placeholder or previous balance logic if we had one.
-    // Since we don't have persistence here, we'll just log the check.
 
-    // Example logic from agent:
-    // if (currentEth < baselineEth) { ... }
+
+
+
+
+
 
     if (hackDetected) {
       runtime.log(`🚨 CRITICAL EXPLOIT DETECTED AND CONFIRMED 🚨`);
@@ -69,7 +66,7 @@ export const onCronTrigger = async (runtime: Runtime<Config>) => {
       );
 
       runtime.log(`⏳ Sending onReport command from Wallet (${wallet.address})...`);
-      // Including the fix for 'possibly undefined' error
+
       const tx = await (sentinelContract as any).onReport(reportPayload);
       runtime.log(`   Broadcasted Tx: ${tx.hash}`);
 
