@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export default function Dashboard() {
   const [config, setConfig] = useState<any>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const savedConfig = localStorage.getItem('sentinel_config');
@@ -151,23 +152,49 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1 flex flex-col justify-center gap-6 py-4">
                     <div className="group relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-danger to-red-900 rounded-lg blur opacity-20 group-hover:opacity-50 transition duration-200"></div>
-                      <button className="relative w-full flex items-center justify-between bg-background-dark border border-danger/50 text-danger hover:bg-danger hover:text-white px-6 py-5 rounded-lg transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(255,59,48,0.3)]">
+                      <div className={`absolute -inset-0.5 bg-gradient-to-r from-danger to-red-900 rounded-lg blur ${isPaused ? 'opacity-60' : 'opacity-20'} group-hover:opacity-50 transition duration-200`}></div>
+                      <button 
+                        onClick={() => setIsPaused(!isPaused)}
+                        className={`relative w-full flex items-center justify-between border border-danger/50 px-6 py-5 rounded-lg transition-all duration-300 ${
+                          isPaused 
+                            ? 'bg-danger text-white shadow-[0_0_20px_rgba(255,59,48,0.5)]' 
+                            : 'bg-background-dark text-danger hover:bg-danger hover:text-white group-hover:shadow-[0_0_20px_rgba(255,59,48,0.3)]'
+                        }`}
+                      >
                         <div className="flex flex-col items-start">
-                          <span className="text-lg font-black tracking-wider uppercase">Pause Protocol</span>
-                          <span className="text-[10px] opacity-80 font-mono">EMERGENCY STOP</span>
+                          <span className="text-lg font-black tracking-wider uppercase">
+                            {isPaused ? "Protocol Paused" : "Pause Protocol"}
+                          </span>
+                          <span className="text-[10px] opacity-80 font-mono">
+                            {isPaused ? "EMERGENCY ACTIVE" : "EMERGENCY STOP"}
+                          </span>
                         </div>
-                        <span className="material-symbols-outlined text-3xl">gpp_bad</span>
+                        <span className="material-symbols-outlined text-3xl">
+                          {isPaused ? "gpp_maybe" : "gpp_bad"}
+                        </span>
                       </button>
                     </div>
                     <div className="group relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-green-800 rounded-lg blur opacity-20 group-hover:opacity-50 transition duration-200"></div>
-                      <button className="relative w-full flex items-center justify-between bg-background-dark border border-primary/50 text-primary hover:bg-primary hover:text-background-dark px-6 py-5 rounded-lg transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(0,255,149,0.3)]">
+                      <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary to-green-800 rounded-lg blur ${!isPaused ? 'opacity-0' : 'opacity-20'} group-hover:opacity-50 transition duration-200`}></div>
+                      <button 
+                        onClick={() => isPaused && setIsPaused(false)}
+                        className={`relative w-full flex items-center justify-between border px-6 py-5 rounded-lg transition-all duration-300 ${
+                          !isPaused 
+                            ? 'bg-background-dark/20 border-primary/20 text-primary/40 cursor-default pointer-events-none' 
+                            : 'bg-background-dark border-primary/50 text-primary hover:bg-primary hover:text-background-dark group-hover:shadow-[0_0_20px_rgba(0,255,149,0.3)]'
+                        }`}
+                      >
                         <div className="flex flex-col items-start">
-                          <span className="text-lg font-black tracking-wider uppercase">Resume Ops</span>
-                          <span className="text-[10px] opacity-80 font-mono">NORMAL OPERATION</span>
+                          <span className="text-lg font-black tracking-wider uppercase">
+                            {isPaused ? "Resume Ops" : "Sentinel Running"}
+                          </span>
+                          <span className="text-[10px] opacity-80 font-mono">
+                            {isPaused ? "RESTART SYSTEM" : "NORMAL OPERATION"}
+                          </span>
                         </div>
-                        <span className="material-symbols-outlined text-3xl">play_circle</span>
+                        <span className="material-symbols-outlined text-3xl">
+                          {isPaused ? "play_circle" : "check_circle"}
+                        </span>
                       </button>
                     </div>
                   </div>
