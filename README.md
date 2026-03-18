@@ -90,15 +90,22 @@ Update the `geminiApiKey` with your key in the staging/production config files:
 }
 ```
 
-### ⛓️ Deployment Logs (Sample)
-When the contracts are deployed and synchronized, you should see output similar to this:
+### 🌍 Ethereum Sepolia Deployment Integration
+
+Sentinel smart contracts and execution environments natively interface with the **Ethereum Sepolia Testnet**. This provides a robust, zero-value staging ground that perfectly replicates mainnet EVM execution constraints, gas mechanics, and RPC node latency. Below are the canonically deployed core protocol contracts on Sepolia:
+
+- **Sentinel Core Protocol:** [`0xd0CC532F55cE6849D5b70E24d6188073F8921621`](https://sepolia.etherscan.io/address/0xd0CC532F55cE6849D5b70E24d6188073F8921621)
+- **Example Defi Vault:** [`0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B`](https://sepolia.etherscan.io/address/0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B)
+- **Chainlink CRE Oracle Forwarder:** [`0x15fc6ae953e024d975e77382eeec56a9101f9f88`](https://sepolia.etherscan.io/address/0x15fc6ae953e024d975e77382eeec56a9101f9f88)
+
+When an initialization script broadcasts transactions to the Sepolia JSON-RPC, the synchronous stdout representation is bound to log payload structures analogous to this protocol handshake:
 
 ```text
 Deploying contracts with the account: 0xEfD0497f4557b49E84369cfb884B6c7446e11aBA
 Vault deployed to: 0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B
 Using CRE Forwarder address: 0x15fc6ae953e024d975e77382eeec56a9101f9f88
 Sentinel deployed to: 0xd0CC532F55cE6849D5b70E24d6188073F8921621
-Setting Sentinel as Vault's guardian...
+Setting Sentinel as Vault's guardian via Sepolia TX...
 Guardian Handshake complete. Sentinel configured as active guardian.
 ```
 
@@ -123,13 +130,63 @@ Navigate to `http://localhost:3000` (or `3001` if port 3000 is occupied).
 
 ---
 
-## 🧩 Architecture
+## ⚙️ Core Technical Workflow & Execution Architecture
 
-1. **Pulse Layer**: The user sets parameters via the React-based Wizard.
-2. **Sentinel Node**: The CRE logic runs on a schedule (defined in `workflow.yaml`).
-3. **Oracle Sync**: Chainlink Capabilities fetch current on-chain balances.
-4. **AI Analysis**: Data is sent to Gemini, which calculates risk based on user-defined thresholds.
-5. **Guardian Action**: If a threat is detected, the CRE node automatically submits a transaction to the `Sentinel.sol` contract to protect the protocol.
+The Sentinel protocol functions as a highly deterministic, asymmetric state machine. It abstracts away the heavy compute load of intent-centric monitoring off-chain while maintaining strict on-chain execution guarantees for security interventions. Here is the deeply technical lifecycle of the protocol:
+
+### 1. Zero-Knowledge Initialization & Discovery (Admin Phase)
+The lifecycle initiates with the Protocol Administrator using the Sentinel Dashboard wizard. The administrator inputs target metadata, chiefly a **Vault Contract Address** existing on the Ethereum Sepolia network. 
+- **EVM Resolution:** The frontend client parses this format string and immediately submits a zero-state read query to an Ethereum Sepolia RPC node to validate ABI adherence and byte-code presence.
+- **Threshold Calibration:** The admin statically defines threshold axioms (e.g., maximum allowable TVL slippage within a discrete block boundary). These parameters are configured as an exact metric state mapping, decoupled from the mainnet to prevent configuration exhaustion attacks.
+
+### 2. Autonomous Chainlink CRE Capabilities (Monitoring Phase)
+With metadata securely ingested, the **Chainlink Runtime Environment (CRE)** orchestration layer assumes full asynchronous control via scheduled compute environments (defined implicitly by `workflow.yaml`).
+- **Cryptographic State Ingestion:** Using Chainlink's specific read-only capabilities natively bound to the Sepolia consensus layer, the CRE daemon invokes continuous background extraction of live Vault state variables (token balances, withdrawal cadence).
+- **Consensus Isolation:** Because reads occur directly against Ethereum Sepolia's deterministic state-tries, Sentinel achieves canonical fidelity without accumulating gas burdens natively associated with continuous on-chain metric analysis.
+
+### 3. Asymmetric AI Heuristics & Inference (Analysis Phase)
+Unstructured on-chain hex data and localized slippage metrics are transformed into a normalized JSON semantic payload. This payload is synchronously bridged into the **Google Gemini 2.0 Flash** LLM inference endpoint.
+- **Intent-Based Anomaly Detection:** Rather than depending purely on simplistic integer limits (which are highly susceptible to flash-loan noise), Gemini evaluates contextual heuristics. It calculates if a simultaneous 40% drain constitutes an ecosystem exploitation vector or a legitimate coordinated migration.
+- **Internal Monologue Yield:** Gemini generates a transparent rationale log. If an exploit fingerprint is classified, the model returns a binary `THREAT_DETECTED` signal to the CRE engine, bypassing standard evaluation cycles to trigger instant escalation.
+
+### 4. Deterministic Lockdown Protocol (Enforcement Action)
+Once the `THREAT_DETECTED` signal propagates into the CRE, the execution pivot occurs, switching the node from passive monitoring to aggressive intervention.
+- **Transaction Assembly:** The CRE node harnesses a funded Externally Owned Account (EOA) instantiated on the Sepolia network. It drafts and signs a localized payload calling the `lockdown()` or `pause()` function.
+- **Forwarder Relay Serialization:** The transaction is funneled through the canonical Chainlink CRE Forwarder (`0x15fc6ae953e024d975e77382eeec56a9101f9f88`), establishing rigid proxy authorization.
+- **On-Chain State Freeze:** The Sepolia-based `Sentinel.sol` guardian contract captures this invocation, confirms the cryptographic signature hierarchy routing from the CRE, and enforces a global `PAUSED` modifier onto the target protocol Vault. Consequently, at the foundational EVM storage layer, all asset transfers are halted atomically, securing the liquidity before subsequent malicious blocks are minted.
+
+### 📌 System Workflow & Topology Flowchart
+
+```mermaid
+sequenceDiagram
+    participant Admin as Protocol Admin
+    participant Web as Sentinel Dashboard Base
+    participant Sepolia as Ethereum Sepolia Ecosystem
+    participant CRE as Chainlink CRE Node
+    participant Gemini as Gemini 2.0 Flash
+    participant Forwarder as CRE Forwarder Contract
+    participant Vault as Deployed Protocol Vault 
+
+    Admin->>Web: Input Target Vault Address & Cast Threshold Definitions
+    Web->>Sepolia: Execute RPC Read-Only State Discovery (ABI Validation)
+    Web->>CRE: Serialize & Push Configurations Data
+    
+    loop Deterministic Synchronization Tick (Cron)
+        CRE->>Sepolia: Extract EVM Storage Values & Activity Vector
+        Sepolia-->>CRE: Return Cryptographic Context (Balances, Block Data)
+        CRE->>Gemini: Stream Multi-Dimensional Payload for Analysis
+        Gemini-->>CRE: Post Heuristic Classification (Organic vs Exploit)
+        
+        alt Threat Binary == TRUE (Threshold Violation Classified)
+            CRE->>CRE: Instantiate Execution Payload
+            CRE->>Forwarder: Broadcast Signed Mitigation TX via Node EOA
+            Forwarder->>Vault: Trigger secure() / lockdown() Mechanism
+            Vault-->>Vault: Enforce Pause Modifier (Write to Storage Trie)
+            Vault-->>CRE: Emit Network Security Log Output
+            CRE->>Web: Update Dashboard Pulse to "CRITICAL: ASSETS SECURED"
+        end
+    end
+```
 
 ## 🧪 CRE Simulation (Backend Engine)
 If you want to test the autonomous security engine without the frontend, you can run a local simulation of the Chainlink Runtime Environment logic.
