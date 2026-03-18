@@ -2,6 +2,8 @@
 
 This is the frontend component of the **Sentinel CRE** project. It provides the user interface for protocol setup, AI reasoning logs, and security dashboards.
 
+> 🚀 **IMPORTANT NOTE:** The Chainlink Runtime Environment (CRE) reasoning engine can be fully simulated and visualized directly within this frontend! After completing the setup operations via the Wizard, you can actively watch the autonomous AI agent analyze your contract and trigger lockdowns in real-time.
+
 For full project documentation, setup instructions, and architecture overview, please refer to the [Root README](../README.md).
 
 ## Quick Start (Local Development)
