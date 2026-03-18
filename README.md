@@ -76,7 +76,7 @@ NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_client_id
 Create a `.env` file in the `sentinel-web/sentinelCRE/sentinel_cre` directory:
 ```env
 PRIVATE_KEY=your_private_key_without_0x
-RPC_URL="https://ethereum-sepolia.publicnode.com"
+RPC_URL="https://virtual.mainnet.us-west.rpc.tenderly.co/d704263c-1ed4-49a9-b739-85806e15ab0f"
 VAULT_ADDRESS=0x4ad0F9D5c075cB10479814F8D9CB874dd7Bfec8B
 SENTINEL_ADDRESS=0xd0CC532F55cE6849D5b70E24d6188073F8921621
 ```
