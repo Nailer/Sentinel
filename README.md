@@ -188,6 +188,40 @@ sequenceDiagram
     end
 ```
 
+## 🔐 On-Chain Execution: The Contract Call Sequence
+
+The smart contracts function as the critical execution layer of the entire system. While the AI (Gemini) and the oracle engine (Chainlink CRE) run off-chain to do the "thinking," they rely on specific on-chain contract calls to physically execute the security lockdown. Here is the exact sequence of how the functions in the contracts are called, what they do, and how they secure the protocol:
+
+### 1. Constant Monitoring (The Read Function)
+Before a hack is even detected, the system needs to know how much money is in the Vault.
+*   **Where it happens:** In `sentinel_cre/main.ts` (inside the `getVaultBalance` function).
+*   **What is called:** It uses the Chainlink capability `evmClient.callContract` to call a Chainlink oracle contract (`BalanceReader`), invoking the `getNativeBalances` function targeting the Vault.
+*   **What it does:** It pulls the latest, cryptographically verifiable EVM balance of the Vault so the AI has context on whether funds are draining.
+
+### 2. The AI Trigger: `Sentinel.sol -> onReport()`
+When Gemini analyzes the balance drop and flags `"DANGER"`, the Chainlink CRE engine switches from *monitoring* to *action*.
+*   **How it's called:** Inside `main.ts` (`triggerEmergencyAction`), the script wraps up a binary "Hack Detected" payload and fires it to the blockchain via `evmClient.writeReport()`. This transaction is routed through the official Chainlink CRE Forwarder contract on Sepolia, which delivers the payload to the `Sentinel.sol` contract.
+*   **What the function does:** 
+    1. The `onReport(bytes calldata report)` function catches the payload.
+    2. It is protected by the `onlyForwarder` modifier, meaning **only** the authorized Chainlink consensus node can successfully call this function (stopping malicious users from spoofing a fake hack report).
+    3. It mathematically decodes the payload (`abi.decode`).
+    4. Seeing that `isHackDetected` is true, the Sentinel contract immediately turns around and makes a cross-contract call to the Vault.
+
+### 3. The Final Lockdown: `Vault.sol -> emergencyPause()`
+This is the ultimate circuit-breaker that actually saves the assets.
+*   **How it's called:** Internally from the blockchain. The `Sentinel.sol` contract executes the line `vault.emergencyPause();`
+*   **What the function does:** 
+    1. The `emergencyPause()` function in `Vault.sol` is caught by the `onlyGuardian` modifier. This requires that `msg.sender == sentinel`. This is a strict security design—it means absolutely *nobody* except the automated Sentinel protocol can trigger this function.
+    2. Once authorized, it triggers the OpenZeppelin `_pause()` internal function, flipping a global boolean flag in the EVM storage from `false` to `true`.
+*   **The Effect:** The `deposit()` and `withdraw()` functions in `Vault.sol` possess the `whenNotPaused` modifier. The microsecond that `_pause()` executes, it becomes mathematically impossible for anyone to execute a withdrawal. The hacker is completely locked out.
+
+### ⚡ Summary of the Closed-Loop Flow:
+1. **Chainlink CRE (Off-chain)** detects danger and calls ➡️ **`onReport()` in `Sentinel.sol`**.
+2. **`Sentinel.sol`** verifies the Chainlink signature and calls ➡️ **`emergencyPause()` in `Vault.sol`**.
+3. **`Vault.sol`** flips the `paused` variable and blocks all core functions via the **`whenNotPaused`** modifier.
+
+---
+
 ## 🧪 CRE Simulation (Backend Engine)
 If you want to test the autonomous security engine without the frontend, you can run a local simulation of the Chainlink Runtime Environment logic.
 
